@@ -4,31 +4,37 @@ import cv2
 import os
 import pytesseract
 
+# Getting file locations for all important information
 russia_1 = os.path.join(os.path.dirname(__file__), 'russia1.jpeg')
 russia_2 = os.path.join(os.path.dirname(__file__), 'russia2.jpeg')
 texas = os.path.join(os.path.dirname(__file__), 'texas.jpeg')
 license_plate_cascade = cv2.CascadeClassifier('haarcascade_russian_plate_number.xml')
 
+# Detecing the license plates
 def detect_license_plates(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     license_plate_locations = license_plate_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
     return license_plate_locations
 
+# Drawing the red boundary boxes around the detected plates
 def draw_boundary_boxes(image, license_plate_locations):
     for (x, y, w, h) in license_plate_locations:
         cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)
     return image
 
+# Extracting the license plates
 def extract_license_plate(image, license_plate_location):
     x, y, w, h = license_plate_location
     crop = image[y:y+h, x:x+w]
     return crop
 
+# Processing the license plates
 def process_license_plate(image):
     binary = cv2.threshold(image, 127, 255, cv2.THRESH_BINARY)[1]
     blurred = cv2.GaussianBlur(binary, (5, 5), 0)
     return blurred
 
+# Recognizing the license plates
 def recognize_license_plate(image):
     characters = pytesseract.image_to_string(image, lang='rus', config='--psm 6')
     return characters
